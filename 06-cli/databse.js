@@ -1,20 +1,34 @@
+// Módulos necessários
 const {
   readFile
 } = require('fs');
+const {
+  promisify
+} = require('util');
+
+// Usando promisifi para tratar a abertura do arquivo
+const readFileAsync = promisify(readFile);
+
+// Abrindo um arquivo json (exemplo)
+//const dadosJson = require('./database.js');
 
 class Database {
   constructor() {
     this.NOME_ARQUIVO = 'herois.json';
-
   }
-  obterArquivo(){
-
+  async obterDadosArquivo(){
+    // abrindo um arquivo texto qualquer
+    const arquivo = await readFileAsync(this.NOME_ARQUIVO, 'utf8');
+    return JSON.parse(arquivo.toString())
   }
   escreverArquivo(){
-
+    return false;
   }
-  listar() {
-    return null
+  async listar(id) {
+    const dados = await this.obterDadosArquivo();
+    const dadosFiltrados = dados.filter(item => (id ? (item.id === id) : true ));
+
+    return dadosFiltrados;
   }
 }
 
