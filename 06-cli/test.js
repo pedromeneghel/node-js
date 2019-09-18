@@ -1,23 +1,45 @@
-const {
-  deepEqual,
-  ok
-} = require('assert');
+const { deepEqual, ok } = require('assert');
+const Database = require('./database');
+const DEFAULT_ITEM_CADASTRAR = { nome: 'Flash', poder: 'speed', id: 1 };
+const DEFAULT_ITEM_ATUALIZAR = {
+  nome: 'Lanterna Verde',
+  poder: 'Anel do poder',
+  id: 2,
+};
 
-const database = require('./database');
+describe('Suite de manipulação de herois', () => {
+  before(async () => {
+    await Database.remover();
+    await Database.cadastrar(DEFAULT_ITEM_CADASTRAR);
+    await Database.cadastrar(DEFAULT_ITEM_ATUALIZAR);
+  });
 
-const DEFAULT_ITEM_CADASTRADO = { nome: 'Flash', poder: 'speed', id: 1 };
+  it('deve cadastrar um heroi', async () => {
+    const expected = DEFAULT_ITEM_CADASTRAR;
+    await Database.cadastrar(DEFAULT_ITEM_CADASTRAR);
 
-describe('Site de manipulação de herois', () => {
-  it('deve pesquisar um heroi, usando arquivos', async () => {
-    const expected = DEFAULT_ITEM_CADASTRADO;
-    const [resultado] = await database.listar(expected.id); //pega primeira posição do array ou ,1 para posição
-    deepEqual(resultado, expected); //completamente igual
+    const [realResult] = await Database.listar(expected.id);
+    deepEqual(realResult, expected);
+  });
 
-  })
-  it('deve cadastrar um heroi, usando arquivos', async () => {
-    const expected = DEFAULT_ITEM_CADASTRADO;
-    const resultado = await database.cadastrar(DEFAULT_ITEM_CADASTRADO); //pega primeira posição do array ou ,1 para posição
-    const [atual] = await database.listar(DEFAULT_ITEM_CADASTRADO.id);
-    deepEqual(atual, expected);
-  })
-})
+  it('deve listar um heroi pelo id', async () => {
+    const expected = DEFAULT_ITEM_CADASTRAR;
+    const result = await Database.listar(1);
+    deepEqual(result[0], expected);
+  });
+
+  it('deve atualizar um heroi pelo id', async () => {
+    const expected = {
+      ...DEFAULT_ITEM_ATUALIZAR,
+      nome: 'Batman',
+      poder: 'ricão',
+    };
+    await Database.atualizar(expected.id, {
+      nome: expected.nome,
+      poder: expected.poder,
+    });
+
+    const [realResult] = await Database.listar(expected.id);
+    deepEqual(realResult, expected);
+  });
+});
